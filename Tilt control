@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>JS Bin</title>
+
+        <!-- here's where we load the NEXUS js library -->
+        <script src="https://rawgit.com/nexus-js/ui/master/dist/NexusUI.js">
+        </script>
+
+        <!-- here is wherer we load the Tone js library -->
+        <script src="https://tonejs.github.io/build/Tone.js">
+        </script>
+
+     <style>     
+       span#description{
+          display:none;
+        }
+       
+       pre#log{ 
+          display:none;
+       }
+     </style>
+
+    </head>
+<body>
+  <span id="description">nexus tilt control of tonejs volume and filter</span>
+  
+  <div id="tilter"></div>
+
+  <!-- in page logging from Phill Phelps 2018 -->
+  <pre id="log">loading...
+  </pre>
+  <script>
+    var pageLogCount = 0;
+    function pageLog(thingToLog){
+      var log = document.getElementById("log");     
+      if ( ++pageLogCount > 10 ){
+        log.innerText = "";
+        pageLogCount = 0;
+      } 
+      log.innerText += thingToLog + "\n";
+    }
+  </script>
+  
+  <!-- all the tone js stuff -->
+  <script>
+    
+    //noise genarator
+    var noise = new Tone.Noise ("pink");
+    noise.start();
+    
+    //filter 
+    var filter = new Tone.Filter (750, 'highpass');
+    
+    noise.connect(filter);
+    filter.connect(Tone.Master);
+    
+  </script>
+  
+  
+  <!-- all the nexus stuff -->
+  <script>
+    
+    //tilt controls 
+    var tilter = new Nexus.Tilt('#tilter');
+    tilter.on('change', tilterActions);
+    
+    function tilterActions(tiltValues)
+    {
+      pageLog(tiltValues.x 
+              + " " 
+              + tiltValues.y 
+              + " " 
+              + tiltValues.z);
+      
+      var dBGain = Tone.gainToDb(tiltValues.y);
+      noise.volume.value = dBGain;  
+      
+      filter.frequency.value = (tiltValues.x * 9800) + 200;;
+      
+    }
+ 
+  </script>
+  </body>
+</html>
